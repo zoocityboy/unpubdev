@@ -1,0 +1,17 @@
+name: eit_unpubdev
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+publish_to: https://zoomaster.home
+homepage: http://test.api
+environment:
+  sdk: ">=2.19.6 <3.0.0"
+
+dev_dependencies:
+  lints: ^2.0.0
+  test: ^1.21.0
+dependencies:
+  http: ^0.13.6
+  minio: ^3.5.0
+  mongo_dart: ^0.7.4+1
+  unpub: ^2.1.0
+  unpub_auth: ^0.1.0+3
