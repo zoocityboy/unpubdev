@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:eit_unpubdev/src/minio_credentials.dart';
-import 'package:eit_unpubdev/src/minio_file_store.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:unpub/unpub.dart' as unpub;
 
@@ -11,7 +9,7 @@ main(List<String> args) async {
   parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
   parser.addOption('port', abbr: 'p', defaultsTo: '4000');
   parser.addOption('database',
-      abbr: 'd', defaultsTo: 'mongodb://localhost:27017/dart_pub');
+      abbr: 'd', defaultsTo: 'mongodb://localhost:27017/unpubdev');
   parser.addOption('proxy-origin', abbr: 'o', defaultsTo: '');
 
   var results = parser.parse(args);
@@ -35,17 +33,18 @@ main(List<String> args) async {
   final app = unpub.App(
     proxy_origin: proxyOrigin.trim().isEmpty ? null : Uri.parse(proxyOrigin),
     metaStore: unpub.MongoStore(db),
-    packageStore: MinioStore(
-      env['MINIO_BUCKET_NAME'] ?? 'unpubdev',
-      region: env['MINIO_DEFAULT_REGION'] ?? 'us-east-1',
-      endpoint: host,
-      getObjectPath: (String name, String version) =>
-          '$name/$name-$version.tar.gz',
-      credentials: MinioCredentials(
-        accessKey: env['MINIO_ROOT_USER'] ?? 'minioadmin',
-        secretKey: env['MINIO_ROOT_PASSWORD'] ?? 'minioadmin',
-      ),
-    ),
+    // packageStore: MinioStore(
+    //   env['MINIO_BUCKET_NAME'] ?? 'unpubdev',
+    //   region: env['MINIO_DEFAULT_REGION'] ?? 'us-east-1',
+    //   endpoint: host,
+    //   getObjectPath: (String name, String version) =>
+    //       '$name/$name-$version.tar.gz',
+    //   credentials: MinioCredentials(
+    //     accessKey: env['MINIO_ROOT_USER'] ?? 'minioadmin',
+    //     secretKey: env['MINIO_ROOT_PASSWORD'] ?? 'minioadmin',
+    //   ),
+    // ),
+    packageStore: unpub.FileStore('./packages'),
     uploadValidator: (pubspec, uploaderEmail) {
       if (env['UNPUBDEV_PACKAGE_PREFIX'] != null) {
         var prefix = env['UNPUBDEV_PACKAGE_PREFIX'] ?? 'company_';
@@ -58,7 +57,7 @@ main(List<String> args) async {
         final envEmails = env['UNPUBDEV_EMAIL_DOMAIN'] ?? 'gmail.com';
         final emails = envEmails.split(',').map((e) => e.trim()).toList();
         if (!emails.any((element) => uploaderEmail.endsWith(element))) {
-          throw 'Uploader email invalid';
+          throw 'Uploader email $uploaderEmail invalid';
         }
       }
 
