@@ -5,23 +5,23 @@ import 'dart:cli';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minio/minio.dart';
+import 'package:minio_new/minio.dart';
 import 'package:unpub/unpub.dart';
 
-import 'aws_credentials.dart';
+import 'minio_credentials.dart';
 
 /// Use an AWS S3 Bucket as a package store
-class S3Store extends PackageStore {
+class MinioStore extends PackageStore {
   String Function(String name, String version)? getObjectPath;
 
   String bucketName;
   String? region;
   String? endpoint;
-  AwsCredentials? credentials;
+  MinioCredentials? credentials;
   Minio? minio;
   Map<String, String>? environment;
 
-  S3Store(this.bucketName,
+  MinioStore(this.bucketName,
       {this.region,
       this.getObjectPath,
       this.endpoint,
@@ -31,20 +31,20 @@ class S3Store extends PackageStore {
     final env = environment ?? Platform.environment;
 
     // Check for env vars or container credentials if none were provided.
-    credentials ??= AwsCredentials(environment: env);
+    credentials ??= MinioCredentials(environment: env);
 
     // Use a supplied minio instance or create a default
     minio ??= Minio(
-      endPoint: endpoint ?? env['AWS_S3_ENDPOINT'] ?? 's3.amazonaws.com',
-      region: region ?? env['AWS_DEFAULT_REGION'],
-      accessKey: credentials!.awsAccessKeyId ?? '',
-      secretKey: credentials!.awsSecretAccessKey ?? '',
+      endPoint: endpoint ?? env['MINIO_ENDPOINT'] ?? 'play.min.io',
+      region: region ?? env['MINIO_DEFAULT_REGION'],
+      accessKey: credentials!.accessKey ?? '',
+      secretKey: credentials!.secretKey ?? '',
     );
 
     // Check for a region or default region which is required
     if (region == null &&
-        (env['AWS_DEFAULT_REGION'] == null ||
-            env['AWS_DEFAULT_REGION']!.isEmpty)) {
+        (env['MINIO_DEFAULT_REGION'] == null ||
+            env['MINIO_DEFAULT_REGION']!.isEmpty)) {
       throw ArgumentError('Could not determine a default region for aws.');
     }
   }

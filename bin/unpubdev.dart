@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:eit_unpubdev/src/aws_credentials.dart';
-import 'package:eit_unpubdev/src/s3_file_store.dart';
+import 'package:eit_unpubdev/src/minio_credentials.dart';
+import 'package:eit_unpubdev/src/minio_file_store.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:unpub/unpub.dart' as unpub;
 
@@ -16,8 +16,10 @@ main(List<String> args) async {
 
   var results = parser.parse(args);
 
-  var host = results['host'] as String;
-  var port = int.parse(results['port'] as String);
+  final env = Platform.environment;
+
+  var host = env['UNPUBDEV_HOST'] ?? results['host'] as String;
+  var port = int.parse(env['UNPUBDEV_PORT'] ?? results['port'] as String);
   var dbUri = results['database'] as String;
   var proxyOrigin = results['proxy-origin'] as String;
 
@@ -33,44 +35,33 @@ main(List<String> args) async {
   final app = unpub.App(
     proxy_origin: proxyOrigin.trim().isEmpty ? null : Uri.parse(proxyOrigin),
     metaStore: unpub.MongoStore(db),
-    packageStore: S3Store(
-      'pubdev',
-
-      // We attempt to find region from AWS_DEFAULT_REGION. If one is not
-      // available or provided an Argument error will be thrown.
-      region: 'us-east-1',
-
-      // Provide a different S3 compatible endpoint.
+    packageStore: MinioStore(
+      env['MINIO_BUCKET_NAME'] ?? 'unpubdev',
+      region: env['MINIO_DEFAULT_REGION'] ?? 'us-east-1',
       endpoint: host,
-
-      // By default packages are sorted into folders in s3 like this.
-      // Pass in an alternative if needed.
       getObjectPath: (String name, String version) =>
           '$name/$name-$version.tar.gz',
-
-      // You can provide credentials manually but...
-      // don't be bad at security populate env vars instead...
-      //
-      // AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxxxxx
-      // AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      credentials: AwsCredentials(
-        awsAccessKeyId: 'BIfYL9y0auX4KqPw',
-        awsSecretAccessKey: 'bElQc7YtZFqI5YOYXVdRtFO8DBxsFsE8',
+      credentials: MinioCredentials(
+        accessKey: env['MINIO_ROOT_USER'] ?? 'minioadmin',
+        secretKey: env['MINIO_ROOT_PASSWORD'] ?? 'minioadmin',
       ),
     ),
     uploadValidator: (pubspec, uploaderEmail) {
-      var prefix = 'eit_';
-      var name = pubspec['name'] as String;
-      if (!name.startsWith(prefix)) {
-        throw 'Package name should starts with $prefix';
+      if (env['UNPUBDEV_PACKAGE_PREFIX'] != null) {
+        var prefix = env['UNPUBDEV_PACKAGE_PREFIX'] ?? 'company_';
+        var name = pubspec['name'] as String;
+        if (!name.startsWith(prefix)) {
+          throw 'Package name should starts with $prefix';
+        }
+      }
+      if (env['UNPUBDEV_EMAIL_DOMAIN'] != null) {
+        final envEmails = env['UNPUBDEV_EMAIL_DOMAIN'] ?? 'gmail.com';
+        final emails = envEmails.split(',').map((e) => e.trim()).toList();
+        if (!emails.any((element) => uploaderEmail.endsWith(element))) {
+          throw 'Uploader email invalid';
+        }
       }
 
-      // Also, you can check if uploader email is valid
-
-      if (!['@embedit.com', '@homecredit.eu']
-          .any((element) => uploaderEmail.endsWith(element))) {
-        throw 'Uploader email invalid';
-      }
       return Future.value();
     },
   );
