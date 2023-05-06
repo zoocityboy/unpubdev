@@ -16,9 +16,9 @@ dependencies:
   mongo_dart: ^0.9.1
   path: ^1.8.3
   unpub:
-    path: packages/unpub
+    git:
+      url: https://github.com/zoocityboy/unpub.git
+      path: unpub
   unpub_auth: ^0.1.0+3
-dependency_overrides:
-  intl: ^0.18.1
 executables:
   unpubdev:
