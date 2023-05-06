@@ -34,7 +34,7 @@ main(List<String> args) async {
 
   final db = Db(dbUri);
   await db.open(); // make sure the MongoDB connection opened
-  var baseDir = path.absolute(env['UNPUBDEV_FOLDER'] ?? 'unpubdev');
+  var baseDir = path.absolute(env['UNPUBDEV_FOLDER'] ?? 'unpubdev-packages');
   // unpub.FileStore()
   final app = unpub.App(
     proxy_origin: proxyOrigin.trim().isEmpty ? null : Uri.parse(proxyOrigin),
