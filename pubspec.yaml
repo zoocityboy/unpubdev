@@ -13,15 +13,12 @@ dependencies:
   args: ^2.4.1
   http: ^0.13.6
   minio_new: ^1.0.2
-  mongo_dart: ^0.7.1
+  mongo_dart: ^0.9.1
   path: ^1.8.3
   unpub:
-    git:
-      url: https://github.com/bytedance/unpub.git
-      path: unpub
-      ref: master
+    path: packages/unpub
   unpub_auth: ^0.1.0+3
 dependency_overrides:
-  intl: ^0.17.0
+  intl: ^0.18.1
 executables:
   unpubdev:
