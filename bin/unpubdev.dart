@@ -1,20 +1,25 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:path/path.dart' as path;
 import 'package:unpub/unpub.dart' as unpub;
 
 main(List<String> args) async {
+  final env = Platform.environment;
+  final dbName = env['MONGO_DB'] ?? 'unpubdev';
+  for (var element in env.entries) {
+    log('${element.key}: ${element.value}');
+  }
   var parser = ArgParser();
   parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
   parser.addOption('port', abbr: 'p', defaultsTo: '4000');
   parser.addOption('database',
-      abbr: 'd', defaultsTo: 'mongodb://localhost:27017/unpubdev');
+      abbr: 'd', defaultsTo: 'mongodb://127.0.0.1:27017/$dbName');
   parser.addOption('proxy-origin', abbr: 'o', defaultsTo: '');
 
   var results = parser.parse(args);
-
-  final env = Platform.environment;
 
   var host = env['UNPUBDEV_HOST'] ?? results['host'] as String;
   var port = int.parse(env['UNPUBDEV_PORT'] ?? results['port'] as String);
@@ -29,7 +34,8 @@ main(List<String> args) async {
 
   final db = Db(dbUri);
   await db.open(); // make sure the MongoDB connection opened
-
+  var baseDir = path.absolute(env['UNPUBDEV_FOLDER'] ?? 'unpubdev');
+  // unpub.FileStore()
   final app = unpub.App(
     proxy_origin: proxyOrigin.trim().isEmpty ? null : Uri.parse(proxyOrigin),
     metaStore: unpub.MongoStore(db),
@@ -44,16 +50,18 @@ main(List<String> args) async {
     //     secretKey: env['MINIO_ROOT_PASSWORD'] ?? 'minioadmin',
     //   ),
     // ),
-    packageStore: unpub.FileStore('./packages'),
+    packageStore: unpub.FileStore(baseDir),
     uploadValidator: (pubspec, uploaderEmail) {
-      if (env['UNPUBDEV_PACKAGE_PREFIX'] != null) {
+      final prefix = (env['UNPUBDEV_PACKAGE_PREFIX'] ?? '').trim();
+      if (prefix.isNotEmpty) {
         var prefix = env['UNPUBDEV_PACKAGE_PREFIX'] ?? 'company_';
         var name = pubspec['name'] as String;
         if (!name.startsWith(prefix)) {
           throw 'Package name should starts with $prefix';
         }
       }
-      if (env['UNPUBDEV_EMAIL_DOMAIN'] != null) {
+      final domains = (env['UNPUBDEV_EMAIL_DOMAIN'] ?? '').trim();
+      if (domains.isNotEmpty) {
         final envEmails = env['UNPUBDEV_EMAIL_DOMAIN'] ?? 'gmail.com';
         final emails = envEmails.split(',').map((e) => e.trim()).toList();
         if (!emails.any((element) => uploaderEmail.endsWith(element))) {
@@ -61,7 +69,7 @@ main(List<String> args) async {
         }
       }
 
-      return Future.value();
+      return Future<void>.value();
     },
   );
 
