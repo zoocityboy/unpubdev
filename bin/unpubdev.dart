@@ -8,9 +8,7 @@ import 'package:unpub/unpub.dart' as unpub;
 main(List<String> args) async {
   final env = Platform.environment;
   final dbName = env['MONGO_DB'] ?? 'unpubdev';
-  for (var element in env.entries) {
-    print('${element.key}: ${element.value}');
-  }
+
   var parser = ArgParser();
   parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
   parser.addOption('port', abbr: 'p', defaultsTo: '4000');
@@ -79,5 +77,11 @@ main(List<String> args) async {
   );
 
   var server = await app.serve(host, port);
+  print('Environment');
+  print("--------------------------");
+  for (var element in env.entries) {
+    print('${element.key}: ${element.value}');
+  }
+  print("--------------------------");
   print('Serving at http://${server.address.host}:${server.port}');
 }
