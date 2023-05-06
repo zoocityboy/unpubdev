@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -10,7 +9,7 @@ main(List<String> args) async {
   final env = Platform.environment;
   final dbName = env['MONGO_DB'] ?? 'unpubdev';
   for (var element in env.entries) {
-    log('${element.key}: ${element.value}');
+    print('${element.key}: ${element.value}');
   }
   var parser = ArgParser();
   parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
@@ -33,9 +32,15 @@ main(List<String> args) async {
   }
 
   final db = Db(dbUri);
-  await db.open(); // make sure the MongoDB connection opened
+  try {
+    await db.open(); // make sure the MongoDB connection opened
+  } catch (e) {
+    print(Error.safeToString(e));
+    rethrow;
+  }
+
   var baseDir = path.absolute(env['UNPUBDEV_FOLDER'] ?? 'unpubdev-packages');
-  // unpub.FileStore()
+
   final app = unpub.App(
     proxy_origin: proxyOrigin.trim().isEmpty ? null : Uri.parse(proxyOrigin),
     metaStore: unpub.MongoStore(db),

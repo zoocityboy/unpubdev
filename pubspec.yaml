@@ -1,21 +1,25 @@
 name: eit_unpubdev
 description: A starting point for Dart libraries or applications.
-version: 1.0.0
-publish_to: http://localhost
+version: 1.0.0+dev.1
 homepage: http://test.api
+publish_to: none
 environment:
   sdk: ">=2.19.6 <3.0.0"
 
 dev_dependencies:
-  lints: ^2.0.0
+  lints: ^2.1.0
   test: ^1.21.0
 dependencies:
-  args: ^2.2.0
+  args: ^2.4.1
   http: ^0.13.6
   minio_new: ^1.0.2
-  mongo_dart: ^0.7.4+1
+  mongo_dart: ^0.9.1
   path: ^1.8.3
-  unpub: ^2.1.0
+  unpub:
+    git:
+      url: https://github.com/bytedance/unpub.git
+      path: unpub
+      ref: master
   unpub_auth: ^0.1.0+3
 dependency_overrides:
   intl: ^0.17.0
