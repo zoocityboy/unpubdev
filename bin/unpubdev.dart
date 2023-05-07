@@ -20,7 +20,7 @@ main(List<String> args) async {
 
   var host = env['UNPUBDEV_HOST'] ?? results['host'] as String;
   var port = int.parse(env['UNPUBDEV_PORT'] ?? results['port'] as String);
-  var dbUri = results['database'] as String;
+  var dbUri = env['UNPUBDEV_MONGO_STRING'] ?? results['database'] as String;
   var proxyOrigin = results['proxy-origin'] as String;
 
   if (results.rest.isNotEmpty) {
