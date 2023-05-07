@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:minio_new/minio.dart';
 import 'package:path/path.dart' as path;
-import 'package:unpub/unpub.dart' as unpub;
 import 'package:unpub/unpub.dart';
 
 part 'minio_credentials.dart';
@@ -32,5 +31,5 @@ PackageStore minioPackageStore(String host) {
   }
 
   var baseDir = path.absolute(env['UNPUBDEV_FOLDER'] ?? 'unpubdev-packages');
-  return unpub.FileStore(baseDir);
+  return FileStore(baseDir);
 }

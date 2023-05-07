@@ -1,5 +1,5 @@
 // ignore_for_file: deprecated_member_use
-part of 'package_store.dart';
+part of 'minio_store.dart';
 
 class MinioCredentials {
   String? accessKey;
