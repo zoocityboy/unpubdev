@@ -1,6 +1,6 @@
 name: eit_unpubdev
 description: A starting point for Dart libraries or applications.
-version: 1.0.0+dev.6
+version: 1.0.0+dev.7
 homepage: http://prntes.space
 publish_to: none
 environment:
