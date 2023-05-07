@@ -1,14 +1,15 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:async';
-import 'dart:cli';
-import 'dart:io';
-import 'dart:typed_data';
+// import 'dart:async';
+// import 'dart:cli';
+// import 'dart:io';
+// import 'dart:typed_data';
 
-import 'package:minio_new/minio.dart';
-import 'package:unpub/unpub.dart';
+// import 'package:minio_new/minio.dart';
+// import 'package:unpub/unpub.dart';
 
-import 'minio_credentials.dart';
+// import 'minio_credentials.dart';
+part of 'minio_store.dart';
 
 /// Use an AWS S3 Bucket as a package store
 class MinioStore extends PackageStore {

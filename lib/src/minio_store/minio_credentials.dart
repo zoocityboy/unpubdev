@@ -1,10 +1,5 @@
 // ignore_for_file: deprecated_member_use
-
-import 'dart:cli';
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:http/http.dart' as http;
+part of 'package_store.dart';
 
 class MinioCredentials {
   String? accessKey;

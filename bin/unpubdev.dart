@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:eit_unpubdev/src/package_store.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:path/path.dart' as path;
 import 'package:unpub/unpub.dart' as unpub;
 
 main(List<String> args) async {
@@ -37,29 +37,17 @@ main(List<String> args) async {
     rethrow;
   }
 
-  var baseDir = path.absolute(env['UNPUBDEV_FOLDER'] ?? 'unpubdev-packages');
-
   final app = unpub.App(
     proxy_origin: proxyOrigin.trim().isEmpty ? null : Uri.parse(proxyOrigin),
     metaStore: unpub.MongoStore(db),
-    // packageStore: MinioStore(
-    //   env['MINIO_BUCKET_NAME'] ?? 'unpubdev',
-    //   region: env['MINIO_DEFAULT_REGION'] ?? 'us-east-1',
-    //   endpoint: host,
-    //   getObjectPath: (String name, String version) =>
-    //       '$name/$name-$version.tar.gz',
-    //   credentials: MinioCredentials(
-    //     accessKey: env['MINIO_ROOT_USER'] ?? 'minioadmin',
-    //     secretKey: env['MINIO_ROOT_PASSWORD'] ?? 'minioadmin',
-    //   ),
-    // ),
-    packageStore: unpub.FileStore(baseDir),
+    packageStore: getPackageStore(host),
     uploadValidator: (pubspec, uploaderEmail) {
       final prefix = (env['UNPUBDEV_PACKAGE_PREFIX'] ?? '').trim();
       if (prefix.isNotEmpty) {
-        var prefix = env['UNPUBDEV_PACKAGE_PREFIX'] ?? 'company_';
-        var name = pubspec['name'] as String;
-        if (!name.startsWith(prefix)) {
+        var envPrefix = env['UNPUBDEV_PACKAGE_PREFIX'] ?? '';
+        final prefixes = envPrefix.split(',').map((e) => e.trim()).toList();
+        var packageName = pubspec['name'] as String;
+        if (!prefixes.any((element) => packageName.startsWith(element))) {
           throw 'Package name should starts with $prefix';
         }
       }
