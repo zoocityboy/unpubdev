@@ -1,7 +1,9 @@
 import 'dart:io';
 
-import 'package:eit_unpubdev/unpubdev.dart';
 import 'package:unpub/unpub.dart';
+
+import 'folder_store/folder_store.dart';
+import 'minio_store/minio_store.dart';
 
 PackageStore getPackageStore(String host) {
   final env = Platform.environment;

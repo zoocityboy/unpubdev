@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:eit_unpubdev/src/package_store.dart';
+import 'package:eit_unpubdev/unpubdev.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:unpub/unpub.dart' as unpub;
 
