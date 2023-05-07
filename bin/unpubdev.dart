@@ -1,37 +1,22 @@
 import 'dart:io';
 
-import 'package:args/args.dart';
 import 'package:eit_unpubdev/unpubdev.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:unpub/unpub.dart' as unpub;
 
 main(List<String> args) async {
   final env = Platform.environment;
-  final dbName = env['MONGO_DB'] ?? 'unpubdev';
 
-  var parser = ArgParser();
-  parser.addOption('host', abbr: 'h', defaultsTo: '0.0.0.0');
-  parser.addOption('port', abbr: 'p', defaultsTo: '4000');
-  parser.addOption('database',
-      abbr: 'd', defaultsTo: 'mongodb://127.0.0.1:27017/$dbName');
-  parser.addOption('proxy-origin', abbr: 'o', defaultsTo: '');
-
-  var results = parser.parse(args);
-
-  var host = env['UNPUBDEV_HOST'] ?? results['host'] as String;
-  var port = int.parse(env['UNPUBDEV_PORT'] ?? results['port'] as String);
-  var dbUri = env['UNPUBDEV_MONGO_STRING'] ?? results['database'] as String;
-  var proxyOrigin = results['proxy-origin'] as String;
-
-  if (results.rest.isNotEmpty) {
-    print('Got unexpected arguments: "${results.rest.join(' ')}".\n\nUsage:\n');
-    print(parser.usage);
-    exit(1);
+  final host = env['UNPUBDEV_HOST'] ?? '0.0.0.0';
+  final port = int.parse(env['UNPUBDEV_PORT'] ?? '4000');
+  final proxyOrigin = env['UNPUBDEV_PROXY_ORIGIN'] ?? '';
+  final db = env['UNPUBDEV_MONGO_STRING'] ?? '';
+  if (db.isEmpty) {
+    throw 'Missing env[\'UNPUBDEV_MONGO_STRING\']';
   }
-
-  final db = Db(dbUri);
+  final database = Db(db);
   try {
-    await db.open(); // make sure the MongoDB connection opened
+    await database.open(); // make sure the MongoDB connection opened
   } catch (e) {
     print(Error.safeToString(e));
     rethrow;
@@ -39,7 +24,7 @@ main(List<String> args) async {
 
   final app = unpub.App(
     proxy_origin: proxyOrigin.trim().isEmpty ? null : Uri.parse(proxyOrigin),
-    metaStore: unpub.MongoStore(db),
+    metaStore: unpub.MongoStore(database),
     packageStore: getPackageStore(host),
     uploadValidator: (pubspec, uploaderEmail) {
       final prefix = (env['UNPUBDEV_PACKAGE_PREFIX'] ?? '').trim();
