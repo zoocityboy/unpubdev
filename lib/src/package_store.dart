@@ -9,7 +9,7 @@ PackageStore getPackageStore(String host) {
   final env = Platform.environment;
   final storage = env['UNPUBDEV_STORAGE'] ?? 'folder';
   if (storage == 'minio') {
-    return minioPackageStore(host);
+    return minioPackageStore();
   }
 
   return folderPackageStore();

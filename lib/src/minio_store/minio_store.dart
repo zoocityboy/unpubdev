@@ -13,8 +13,9 @@ import 'package:unpub/unpub.dart';
 part 'minio_credentials.dart';
 part 'minio_file_store.dart';
 
-PackageStore minioPackageStore(String host) {
+PackageStore minioPackageStore() {
   final env = Platform.environment;
+  final host = env['UNPUBDEV_HOST'] ?? '0.0.0.0';
   final storage = env['UNPUBDEV_STORAGE'] ?? 'folder';
   if (storage == 'minio') {
     return MinioStore(
