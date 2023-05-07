@@ -12,7 +12,8 @@ main(List<String> args) async {
   final proxyOrigin = env['UNPUBDEV_PROXY_ORIGIN'] ?? '';
   final db = env['UNPUBDEV_MONGO_STRING'] ?? '';
   if (db.isEmpty) {
-    throw 'Missing env[\'UNPUBDEV_MONGO_STRING\']';
+    print('Missing env[\'UNPUBDEV_MONGO_STRING\']');
+    exit(1);
   }
   final database = Db(db);
   try {
